@@ -18,6 +18,7 @@ public class MCMGuiBgWorker extends SwingWorker<Object, Void> {
     long DELAY = 500;
 
     Boolean pause = false;
+    boolean nextStep = false;
 
     int[][] m;
     int[][] s;
@@ -31,33 +32,34 @@ public class MCMGuiBgWorker extends SwingWorker<Object, Void> {
 
     MCMGui mcmGui;
 
-    public MCMGuiBgWorker(MCMGui mcmGui) {
+    public MCMGuiBgWorker(int[] input, MCMGui mcmGui) {
         this.mcmGui = mcmGui;
-
+        
+        this.p = input;
+        
         n = p.length - 1;
         len = n + 1;
-      //  System.out.println(len);
     }
 
     public void setPause(Boolean flag) {
         this.pause = flag;
     }
-
-    public void printPause() {
-       // System.out.println(pause);
+    
+    public void setNextStep(boolean flag) {
+        
+        this.nextStep = flag;   // This will make sure that the current step is unpaused and paused after the next step.
+        pause = false;  // Unpause current step
     }
 
     @Override
     public Object doInBackground() {
-        //    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-
+        
         m = new int[n + 1][n + 1];
 
-        // Print to GUI
         //s[2..n-1][1..n]
         s = new int[n + 1][n + 1];
 
-        // m[i][i] = 0. There is no cost for multiplying a single matrix.
+        // There is no cost for multiplying a single matrix.
         for (int i = 0; i < n; i++) {
             m[i][i] = 0;
         }
@@ -67,13 +69,20 @@ public class MCMGuiBgWorker extends SwingWorker<Object, Void> {
 
             for (int i = 1; i <= n - l + 1; i++) {
                 int j = i + l - 1;
+                
+                
+                // Assign a huge value to each cell, new values will be compare against this value to check which is lower
+                // Of course, new values will be lower than this initial value.
+               
                 m[i][j] = Integer.MAX_VALUE;
                 mcmGui.updateGUI_M(i, j, m[i][j]);
-               /* try {
-                    Thread.sleep(DELAY);
-                } catch (Exception e) {
+                
+                try {
+                            Thread.sleep(100);  // This is required, else the pause does not update {SWING mechanism)
+                        } catch (Exception e) {
+                            e.printStackTrace();
 
-                }*/
+                        }
 
                 // Unhighlight the Cell
                 mcmGui.updateGUI_M_unhighlight(i, j);
@@ -86,15 +95,6 @@ public class MCMGuiBgWorker extends SwingWorker<Object, Void> {
 
                 int j = i + l - 1;
 
-                // Assign a huge value to each cell, new values will be compare against this value to check which is lower
-                // Of course, new values will be lower than this initial value.
-                // m[i][j] = Integer.MAX_VALUE;
-                // mcmGui.updateGUI_M(i, j, m[i][j]);
-              /*  try {
-                 Thread.sleep(DELAY);
-                 } catch (Exception e) {
-
-                 }*/
                 for (int k = i; k <= j - 1; k++) {
 
                     // Check to see if a pause is required
@@ -107,8 +107,39 @@ public class MCMGuiBgWorker extends SwingWorker<Object, Void> {
                         }
                     }
                     
-                    // FIXME - Highlight cell for evaluation
+                    // Check for next step
+                    if(nextStep) {
+                        pause = true;
+                        nextStep = false;
+                    }
+                    
+                    mcmGui.setComputedLabel("");
+                    mcmGui.setExistingLabel("");
+                    
+                    
+                    // Highlight cell for evaluation
                     mcmGui.highlightMForEval(i, j);
+                    
+   
+                    
+                    // Check to see if a pause is required
+                    while (pause) {
+                        try {
+                            Thread.sleep(100);  // This is required, else the pause does not update {SWING mechanism)
+                        } catch (Exception e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                    
+                    // Check for next step
+                    if(nextStep) {
+                        pause = true;
+                        nextStep = false;
+                    }
+                    
+                    
+                    
 
                     int q = m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j];
                     
@@ -116,16 +147,39 @@ public class MCMGuiBgWorker extends SwingWorker<Object, Void> {
                     mcmGui.unHighlightLabel2();
                     
                     String str1 = "m[" + i + "][" + k + "] + " + "m[" + (k+1) + "][" + j + "] + p" + (i-1) + "p" + k + "p" + j + " = " + q + " ( K = " + k + " )"; 
-                    mcmGui.setLabel1(str1);
+                    mcmGui.setComputedLabel(str1);
                     
                     String str2 = "m[" + i + "][" + j + "] = " + m[i][j] + " ( K = " + s[i][j] + " ) ";
-                    mcmGui.setLabel2(str2);
+                    mcmGui.setExistingLabel(str2);
                     
                     try {
                             Thread.sleep(DELAY);
                         } catch (Exception e) {
 
                         }
+                    
+                    
+                    
+                    // Check to see if a pause is required
+                    while (pause) {
+                        try {
+                            Thread.sleep(100);  // This is required, else the pause does not update {SWING mechanism)
+                        } catch (Exception e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                    
+                    // Check for next step
+                    if(nextStep) {
+                        pause = true;
+                        nextStep = false;
+                    }
+                    
+                    
+                    
+                    
+                    
                     
                     if( q < m[i][j]) {
                         // Highlight Label1
@@ -142,8 +196,33 @@ public class MCMGuiBgWorker extends SwingWorker<Object, Void> {
 
                         }
 
+                     // Next Step
                     
                     if (q < m[i][j]) {
+                        
+                        
+                        
+                        
+                        // Check to see if a pause is required
+                    while (pause) {
+                        try {
+                            Thread.sleep(100);  // This is required, else the pause does not update {SWING mechanism)
+                        } catch (Exception e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                    
+                    // Check for next step
+                    if(nextStep) {
+                        pause = true;
+                        nextStep = false;
+                    }
+                        
+                        
+                        
+                        
+                        
 
                         System.out.println("Quantity:\t" + q + " is less than \tm[" + i + "][" + j + "] " + m[i][j] + "| k=" + k);
                         m[i][j] = q;
@@ -166,8 +245,14 @@ public class MCMGuiBgWorker extends SwingWorker<Object, Void> {
 
                             }
                         }
+                        
+                        // Check for next step
+                    if(nextStep) {
+                        pause = true;
+                        nextStep = false;
+                    }
 
-                        // Unhighlight the Cell
+                    // Unhighlight the Cell
                         mcmGui.updateGUI_M_unhighlight(i, j);
                         mcmGui.updateGUI_S_unhighlight(i, j);
                     }
@@ -205,10 +290,11 @@ public class MCMGuiBgWorker extends SwingWorker<Object, Void> {
             System.out.println();
         }
 
-        System.out.println("Expression:");
-
-        printOptimalExpression(s, 1, n);
+        // Fetch the optimal expression
         optExp = printOptimalExpression1(s, 1, n);
+        
+        // Update the UI
+        mcmGui.setOptimalExpression(optExp);
 
         return null;
 
@@ -262,6 +348,8 @@ public class MCMGuiBgWorker extends SwingWorker<Object, Void> {
         } catch (ExecutionException ex) {
             Logger.getLogger(MCMGuiBgWorker.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        mcmGui.postCompletion();
     }
 
 }
