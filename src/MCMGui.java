@@ -386,6 +386,7 @@ public class MCMGui extends javax.swing.JFrame {
         aboutMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Matrix Chain Multiplication");
 
         inputsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Inputs"));
 
